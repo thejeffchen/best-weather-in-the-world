@@ -21,7 +21,7 @@ td:nth-child(1),td:nth-child(2),th:nth-child(1),th:nth-child(2){text-align:left}
 th{cursor:pointer;background:#fafafa;position:sticky;top:0;font-weight:600;z-index:1}th small{display:block;font-weight:400;color:#888}
 .scroll{max-height:640px;overflow:auto}
 table.fx{table-layout:fixed}table.fx td,table.fx th{overflow:hidden;text-overflow:ellipsis}.rz{position:absolute;right:0;top:0;bottom:0;width:7px;cursor:col-resize;z-index:4}.rz:hover{background:#1d233033}
-tbody td:first-child{position:sticky;left:0;background:#fff;z-index:1;box-shadow:2px 0 0 #e5e7eb}thead th:first-child{position:sticky;left:0;top:0;z-index:3;box-shadow:2px 0 0 #e5e7eb}
+tbody td:first-child{position:sticky;left:0;background:#fff;z-index:1}tbody td:nth-child(2){position:sticky;left:var(--c1w,180px);background:#fff;z-index:1;box-shadow:2px 0 0 #e5e7eb}thead th:first-child{position:sticky;left:0;top:0;z-index:3}thead th:nth-child(2){position:sticky;left:var(--c1w,180px);top:0;z-index:3;box-shadow:2px 0 0 #e5e7eb}
 .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
 input{width:100%;padding:6px 8px;border:1px solid #ccc;border-radius:6px;margin:8px 0;box-sizing:border-box}
 .b{font-weight:700}
@@ -74,7 +74,7 @@ setTimeout(()=>{document.querySelectorAll('thead th').forEach(th=>{const k=th.da
 
 let PINS=new Set(),ONLY=false;try{PINS=new Set(JSON.parse(localStorage.getItem('pins')||'[]'))}catch(_){}
 function savePins(){try{localStorage.setItem('pins',JSON.stringify([...PINS]))}catch(_){}}
-function stickPins(){const th=document.querySelector('thead');let top=th?th.getBoundingClientRect().height:0;document.querySelectorAll('#tb tr.pinned').forEach(tr=>{[...tr.children].forEach((td,i)=>{td.style.position='sticky';td.style.top=top+'px';td.style.zIndex=td===tr.firstElementChild?4:2});top+=tr.getBoundingClientRect().height})}
+function stickPins(){const th=document.querySelector('thead');let top=th?th.getBoundingClientRect().height:0;document.querySelectorAll('#tb tr.pinned').forEach(tr=>{[...tr.children].forEach((td,i)=>{td.style.position='sticky';td.style.top=top+'px';td.style.zIndex=i<2?4:2});top+=tr.getBoundingClientRect().height})}
 function pbtns(){const a=document.getElementById('ponly'),b=document.getElementById('pclear');if(!a)return;a.textContent=(ONLY?'Show all cities':'📌 Pinned only')+(PINS.size?' ('+PINS.size+')':'');a.classList.toggle('on',ONLY);a.disabled=!PINS.size&&!ONLY;b.style.display=PINS.size?'':'none'}
 setTimeout(()=>{document.getElementById('ponly').onclick=()=>{ONLY=!ONLY;draw()};document.getElementById('pclear').onclick=()=>{PINS.clear();ONLY=false;savePins();draw()};tb.addEventListener('click',e=>{const pn=e.target.closest('.pin');if(!pn)return;e.stopPropagation();const p=P[+pn.closest('tr').dataset.id];if(PINS.has(p.n))PINS.delete(p.n);else PINS.add(p.n);if(!PINS.size)ONLY=false;savePins();draw()},true)},0);
 
@@ -100,7 +100,7 @@ let dragC=null;ths.forEach(th=>{th.addEventListener('dragstart',e=>{dragC=+th.da
 th.addEventListener('dragover',e=>{e.preventDefault();th.style.boxShadow='inset 3px 0 0 #1d2330'});th.addEventListener('dragleave',()=>th.style.boxShadow='');
 th.addEventListener('drop',e=>{e.preventDefault();th.style.boxShadow='';const to=+th.dataset.col;if(dragC===null||dragC===to)return;ORDER.splice(ORDER.indexOf(dragC),1);ORDER.splice(ORDER.indexOf(to),0,dragC);try{localStorage.setItem('colOrder4',JSON.stringify(ORDER))}catch(_){}applyOrder()})});
 const tbl=document.querySelector('table');let WID={};try{WID=JSON.parse(localStorage.getItem('colW5'))||{}}catch(e){}
-function sizeCols(){if(!tbl.classList.contains('fx')){ths.forEach(th=>{if(!WID[th.dataset.col])WID[th.dataset.col]=Math.ceil(th.getBoundingClientRect().width)});tbl.classList.add('fx')}let tot=0;ths.forEach(th=>{const w=WID[th.dataset.col];th.style.width=w+'px';tot+=w});tbl.style.width=tot+'px'}
+function fzw(){const f=document.querySelector('thead tr').firstElementChild;if(f)tbl.style.setProperty('--c1w',f.getBoundingClientRect().width+'px')}function sizeCols(){setTimeout(fzw,0);if(!tbl.classList.contains('fx')){ths.forEach(th=>{if(!WID[th.dataset.col])WID[th.dataset.col]=Math.ceil(th.getBoundingClientRect().width)});tbl.classList.add('fx')}let tot=0;ths.forEach(th=>{const w=WID[th.dataset.col];th.style.width=w+'px';tot+=w});tbl.style.width=tot+'px'}
 let rzOn=false;ths.forEach(th=>{const h=document.createElement('span');h.className='rz';th.appendChild(h);h.addEventListener('mousedown',e=>{e.preventDefault();e.stopPropagation();rzOn=true;th.draggable=false;const x0=e.clientX,w0=th.getBoundingClientRect().width,c=th.dataset.col;
 const mv=ev=>{WID[c]=Math.max(40,Math.round(w0+ev.clientX-x0));sizeCols()};const up=()=>{document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);th.draggable=true;setTimeout(()=>rzOn=false,50);try{localStorage.setItem('colW5',JSON.stringify(WID))}catch(_){}};document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up)});h.addEventListener('click',e=>e.stopPropagation())});
 refresh();
